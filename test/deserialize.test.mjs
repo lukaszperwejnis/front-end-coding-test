@@ -106,7 +106,7 @@ test("deserialize nested deeper", () => {
       total: 2,
     });
   });
-  
+
   const getRandomChar = () => String.fromCharCode(97 + Math.floor(Math.random() * 25 + 1));
 
 test('deserialize rows with any name pattern', () => {
