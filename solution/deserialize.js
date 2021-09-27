@@ -30,9 +30,8 @@ export function deserialize(value) {
                 }
             }
 
-            if (elementByGivenIndex) {
+            if (!elementByGivenIndex) {
                 container[index] = {
-                    ...elementByGivenIndex,
                     [fieldName]: getDeserializedValue(currentValue)
                 }
 
@@ -42,7 +41,9 @@ export function deserialize(value) {
                 }
             }
 
+
             container[index] = {
+                ...elementByGivenIndex,
                 [fieldName]: getDeserializedValue(currentValue)
             }
 
@@ -91,7 +92,6 @@ function getDeserializedValue(value) {
         default:
             return value;
     }
-
 }
 
 function getDeserializedDateValue(value) {

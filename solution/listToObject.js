@@ -1,9 +1,9 @@
-import { cloneObject, isObject } from "./utils";
+import { getDeepClone, isObject } from "./utils";
 
 export const listToObject = (value) => value.reduce((acc, {name, value}) => {
 
     return {
         ...acc,
-        [name]: isObject(value) ? cloneObject(value) : value
+        [name]: isObject(value) ? getDeepClone(value) : value
     }
 }, {});

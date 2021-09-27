@@ -2,7 +2,7 @@ function isObject(value) {
     return typeof value === 'object' && value !== null;
 }
 
-function cloneObject(value) {
+function getDeepClone(value) {
     try {
         return JSON.parse(JSON.stringify(value));
     } catch (error) {
@@ -23,4 +23,4 @@ function getFormattedDate(value) {
     return day + '/' + month + '/' + year;
 }
 
-export { isObject, cloneObject, getFormattedDate };
+export { isObject, getDeepClone, getFormattedDate };
