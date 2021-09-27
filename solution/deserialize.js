@@ -1,15 +1,19 @@
-export const deserialize = (obj) => {
+import { getFormattedDate, isObject } from "./utils";
+
+const DESERIALIZE_SEPARATOR = '_';
+const TIME_FORMAT_PREFIX = 't:'
+
+export function deserialize(value) {
     try {
-        return Object.keys(obj).reduce((acc, currentKey) => {
+        return Object.keys(value).reduce((acc, currentKey) => {
             if (!isDeserializable(currentKey)) {
                 return {
                     ...acc,
-                    [currentKey]: obj[currentKey]
+                    [currentKey]: value[currentKey]
                 }
             }
 
-
-            const currentValue = obj[currentKey];
+            const currentValue = value[currentKey];
             const { containerName, index, fieldName } = getContainerNameIndexAndFieldNameFromKey(currentKey);
             const container = acc[containerName];
             const elementByGivenIndex = container ? container[index] : null;
@@ -50,15 +54,11 @@ export const deserialize = (obj) => {
     } catch (error) {
         console.error(`deserialize: ${error}`);
     }
-};
-
-
-const DESERIALIZABLE_SEPARATOR = '_';
-const TIME_FORMAT_PREFIX = 't:'
+}
 
 function isDeserializable(value) {
-    const hasValidSeparator = value.includes(DESERIALIZABLE_SEPARATOR);
-    const [parentNameWithIndex, fieldName] = value.split(DESERIALIZABLE_SEPARATOR);
+    const hasValidSeparator = value.includes(DESERIALIZE_SEPARATOR);
+    const [parentNameWithIndex, fieldName] = value.split(DESERIALIZE_SEPARATOR);
     const hasValidFormat = Boolean(parentNameWithIndex && fieldName);
     const hasValidIndex = !isNaN(Number(parentNameWithIndex[parentNameWithIndex.length - 1]));
 
@@ -70,7 +70,8 @@ function isDeserializable(value) {
 }
 
 function getContainerNameIndexAndFieldNameFromKey(key) {
-    const [containerNameWithIndex, fieldName] = key.split(DESERIALIZABLE_SEPARATOR);
+    const [containerNameWithIndex, fieldName] = key.split(DESERIALIZE_SEPARATOR);
+
     // TODO
     // for tests assumptions where index is always with one digit
     // in the future could be improved by checking type of ending key name
@@ -81,25 +82,24 @@ function getContainerNameIndexAndFieldNameFromKey(key) {
     };
 }
 
-function getDeserializedValue(field) {
-    const isObject = typeof field === 'object' && !Array.isArray(field) && field !== null;
+function getDeserializedValue(value) {
     switch (true) {
-        case isObject:
-            return deserialize(field);
-        case typeof field === 'string' && field.includes(TIME_FORMAT_PREFIX):
-            return deserializeTimeValue(field);
+        case isObject(value) && !Array.isArray(value):
+            return deserialize(value);
+        case typeof value === 'string' && value.includes(TIME_FORMAT_PREFIX):
+            return getDeserializedDateValue(value);
         default:
-            return field;
+            return value;
     }
 
 }
 
-function deserializeTimeValue(value) {
+function getDeserializedDateValue(value) {
     const parsedDate = Number(value.slice(TIME_FORMAT_PREFIX.length, value.length));
 
     if (isNaN(parsedDate)) {
-        throw Error(`Given date is invalid: ${value}`);
+        throw new Error(`Given date is invalid: ${value}`);
     }
 
-    return new Intl.DateTimeFormat('en-US').format(parsedDate)
+    return getFormattedDate(parsedDate);
 }
